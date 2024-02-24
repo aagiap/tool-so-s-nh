@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Tạo giao diện người dùng với Zenity
+while true; do
+  CHOICE=$(zenity --list --title="So sánh siêu cấp" --column="Options" "Select zip file" "Start")
+
+  case "$CHOICE" in
+    "Select zip file")
+      # Cho phép người dùng chọn tệp
+      zip_file=$(zenity --file-selection --title="Chọn tệp zip")
+      ;;
+    "Start")
+      if [ -z "$zip_file" ]; then
+        zenity --error --text="Vui lòng chọn tệp zip trước khi bắt đầu."
+      else
+        # Thực hiện thao tác với tệp zip
+        temp_dir=$(mktemp -d)
+        unzip "$zip_file" -d "$temp_dir" > /dev/null
+        file_list=($(ls "$temp_dir"))
+        result=""
+        for ((i=0; i<${#file_list[@]}; i++)); do
+          for ((j=i+1; j<${#file_list[@]}; j++)); do
+            file1="${file_list[$i]}"
+            file2="${file_list[$j]}"
+            total_lines_file1=$(wc -l < "$temp_dir/$file1")
+            total_lines_file2=$(wc -l < "$temp_dir/$file2")
+            diff_output=$(diff "$temp_dir/$file1" "$temp_dir/$file2")
+            different_lines=$(echo "$diff_output" | grep "^<" | wc -l)
+            line_difference=$(($total_lines_file1-$total_lines_file2))
+            if [ $line_difference -lt 0 ]; then
+              line_difference=$((-$line_difference))
+            fi
+            if [ $total_lines_file1 -lt $total_lines_file2 ]; then
+              total_lines_file1=$((total_lines_file1+$line_difference))
+            elif [ $total_lines_file2 -lt $total_lines_file1 ]; then
+              total_lines_file2=$((total_lines_file2+$line_difference))
+            fi
+            similarity_percentage=$(bc <<< "scale=2; ((($total_lines_file1) - ($line_difference+$different_lines)) * 100) / ($total_lines_file1)")
+            result+=" $file1 - $file2: $similarity_percentage%\\n"
+          done
+        done
+        rm -rf "$temp_dir"
+        zenity --info --text="$result"
+      fi
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
