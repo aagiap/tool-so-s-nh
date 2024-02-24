@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# Kiểm tra xem có đúng 2 đối số (tên của 2 file cần so sánh) được truyền vào không
+if [ "$#" -ne 2 ]; then
+    echo "Sử dụng: $0 <file1> <file2>"
+    exit 1
+fi
+
+# Lưu tên file từ đối số
+file1="$1"
+file2="$2"
+
+# Kiểm tra xem các file có tồn tại không
+if [ ! -e "$file1" ]; then
+    echo "File '$file1' không tồn tại."
+    exit 1
+fi
+
+if [ ! -e "$file2" ]; then
+    echo "File '$file2' không tồn tại."
+    exit 1
+fi
+
+# So sánh văn bản sử dụng diff
+diff_output=$(diff -u "$file1" "$file2")
+difference_percentage=$(echo "$diff_output" | grep -c '^[-+]')
+
+# Lưu tên file hình ảnh từ đối số
+img1="$1"
+img2="$2"
+
+# Kiểm tra xem các file hình ảnh có tồn tại không
+if [ ! -e "$img1" ]; then
+    echo "File '$img1' không tồn tại."
+    exit 1
+fi
+
+if [ ! -e "$img2" ]; then
+    echo "File '$img2' không tồn tại."
+    exit 1
+fi
+
+# Sử dụng OpenCV để so sánh hình ảnh và lấy phần trăm sự giống nhau
+similarity_percentage=$(python3 - <<EOF
+import cv2
+import numpy as np
+
+# Đọc hình ảnh
+img1 = cv2.imread('$img1')
+img2 = cv2.imread('$img2')
+
+# Kiểm tra rỗng và kích thước
+if img1 is not None and img2 is not None and img1.shape == img2.shape:
+    # Tính toán độ giống nhau
+    difference = cv2.absdiff(img1, img2)
+    result = cv2.countNonZero(cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY))
+    height, width, _ = img1.shape
+    total_pixels = height * width
+    percentage = (total_pixels - result) / total_pixels * 100
+    print(percentage)
+else:
+    print("0")
+EOF
+)
+
+# Hiển thị kết quả
+echo "Độ khác biệt văn bản: $difference_percentage%"
+echo "Độ giống nhau hình ảnh: $similarity_percentage%"
+
+
+
