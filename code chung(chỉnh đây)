@@ -54,7 +54,7 @@ while true; do
           done
         done
         rm -rf "$temp_dir"
-        zenity --info --text="$result"
+        zenity --info --text="$result
       fi
       ;;
     *)
