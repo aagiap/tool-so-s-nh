@@ -24,7 +24,7 @@ while true; do
             file2="${file_list[$j]}"
             total_lines_file1=$(wc -l < "$temp_dir/$file1")
             total_lines_file2=$(wc -l < "$temp_dir/$file2")
-            diff_output=$(diff "$temp_dir/$file1" "$temp_dir/$file2")
+            diff_output=$(diff --side-by-side "$temp_dir/$file1" "$temp_dir/$file2")
             different_lines=$(echo "$diff_output" | grep "^<" | wc -l)
             line_difference=$(($total_lines_file1-$total_lines_file2))
             if [ $line_difference -lt 0 ]; then
