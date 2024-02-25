@@ -1,30 +1,3 @@
-#!/bin/bash
-
-# Kiểm tra xem có đúng 2 đối số (tên của 2 file cần so sánh) được truyền vào không
-if [ "$#" -ne 2 ]; then
-    echo "Sử dụng: $0 <file1> <file2>"
-    exit 1
-fi
-
-# Lưu tên file từ đối số
-file1="$1"
-file2="$2"
-
-# Kiểm tra xem các file có tồn tại không
-if [ ! -e "$file1" ]; then
-    echo "File '$file1' không tồn tại."
-    exit 1
-fi
-
-if [ ! -e "$file2" ]; then
-    echo "File '$file2' không tồn tại."
-    exit 1
-fi
-
-# So sánh văn bản sử dụng diff
-diff_output=$(diff -u "$file1" "$file2")
-difference_percentage=$(echo "$diff_output" | grep -c '^[-+]')
-
 # Lưu tên file hình ảnh từ đối số
 img1="$1"
 img2="$2"
@@ -66,6 +39,3 @@ EOF
 # Hiển thị kết quả
 echo "Độ khác biệt văn bản: $difference_percentage%"
 echo "Độ giống nhau hình ảnh: $similarity_percentage%"
-
-
-
