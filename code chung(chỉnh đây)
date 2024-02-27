@@ -1,13 +1,73 @@
 #!/bin/bash
 
+# Hàm để giải nén file zip và đọc các file bên trong
+extract_zip_files() {
+    zip_file="$1"
+    # Tạo thư mục tạm thời
+    temp_dir=$(mktemp -d)
+    # Giải nén file zip vào thư mục tạm thời
+    unzip "$zip_file" -d "$temp_dir" > /dev/null
+    # Lấy danh sách các file trong thư mục tạm thời
+    files=$(find "$temp_dir" -type f)
+    # Hiển thị danh sách các file
+    echo "$files"
+    # Xóa thư mục tạm thời sau khi hoàn thành
+    rm -rf "$temp_dir"
+}
+
+# Hàm để kiểm tra loại file
+check_file_type() {
+    # Kiểm tra loại file bằng câu lệnh `file`
+    file_type=$(file -b --mime-type "$1")
+
+    # Nếu file là văn bản, trả về "text"
+    if [[ $file_type == "text/plain" ]]; then
+        echo "text"
+    # Nếu file là hình ảnh, trả về "image"
+    elif [[ $file_type == image/* ]]; then
+        echo "image"
+    # Nếu không, trả về MIME type của file
+    else
+        echo "$file_type"
+    fi
+}
+
+# Hàm để so sánh MIME giữa hai file
+compare_mime_files() {
+    file1="$1"
+    file2="$2"
+    # Kiểm tra loại file của hai file
+    type_file1=$(check_file_type "$file1")
+    type_file2=$(check_file_type "$file2")
+    
+    # Thực hiện so sánh tùy thuộc vào loại file của hai file
+    case "$type_file1-$type_file2" in
+      "text-text")
+        compare_text_files "$file1" "$file2"
+        ;;
+      "image-image")
+        compare_image_files "$file1" "$file2"
+        ;;
+      "text-image")
+        echo "0"  # Không cần so sánh văn bản với hình ảnh
+        ;;
+      "image-text")
+        echo "0"  # Không cần so sánh hình ảnh với văn bản
+        ;;
+      *)
+        echo "Không thể so sánh do loại file khác nhau."
+        ;;
+    esac
+}
+
 # Tạo giao diện người dùng với Zenity
 while true; do
-  CHOICE=$(zenity --list --title="So sánh siêu cấp" --column="Options" "Select zip file" "Start")
+  CHOICE=$(zenity --list --title="So sánh MIME" --column="Options" "Chọn file ( .zip )" "Start")
 
   case "$CHOICE" in
-    "Select zip file")
-      # Cho phép người dùng chọn tệp
-      zip_file=$(zenity --file-selection --title="Chọn tệp zip")
+    "Chọn file ( .zip )")
+      # Cho phép người dùng chọn file zip
+      zip_file=$(zenity --file-selection --title="Chọn file zip")
       ;;
     "Start")
       if [ -z "$zip_file" ]; then
@@ -54,7 +114,8 @@ while true; do
           done
         done
         rm -rf "$temp_dir"
-        zenity --info --text="$result
+        zenity --info --text="$result"
+        break
       fi
       ;;
     *)
