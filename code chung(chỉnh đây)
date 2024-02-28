@@ -84,6 +84,14 @@ while true; do
         temp_dir=$(mktemp -d)
         unzip "$zip_file" -d "$temp_dir" > /dev/null
         file_list=($(ls "$temp_dir"))
+
+        # Kiểm tra số lượng tệp trong tệp zip
+        if [ ${#file_list[@]} -lt 2 ]; then
+          zenity --error --text="Cần ít nhất hai tệp để so sánh."
+          rm -rf "$temp_dir"
+          continue
+        fi
+
         result=""
         for ((i=0; i<${#file_list[@]}; i++)); do
           for ((j=i+1; j<${#file_list[@]}; j++)); do
