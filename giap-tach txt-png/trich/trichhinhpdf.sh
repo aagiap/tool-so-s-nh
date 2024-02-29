@@ -18,8 +18,13 @@ fi
 # Tạo thư mục mới để lưu hình ảnh
 mkdir -p images
 
+# Biến đếm để tạo tên tệp duy nhất
+count=0
+
 # Trích xuất hình ảnh từ tệp PDF
-pdfimages -png "$PDF_FILE" img
+for page in $(seq 0 $(pdfinfo "$PDF_FILE" | awk '/Pages/ {print $2}')); do
+    pdfimages -png -f $page -l $page "$PDF_FILE" "img_$count"
+    count=$((count+1))
+done
 
 echo "Trích xuất hình ảnh từ PDF thành công."
-

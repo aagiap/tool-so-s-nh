@@ -1,5 +1,6 @@
 from docx import Document
 import sys
+import os
 
 def extract_images_from_docx(docx_file):
     doc = Document(docx_file)
@@ -21,7 +22,7 @@ for docx_file in docx_files:
 
     # Lưu hình ảnh thành các tệp PNG
     for i, image in enumerate(images):
-        with open(f"{docx_file}_image_{i}.png", "wb") as f:
+        with open(os.path.join("images", f"{os.path.basename(docx_file)}_image_{i}.png"), "wb") as f:
             f.write(image)
 
 print("Extraction complete.")

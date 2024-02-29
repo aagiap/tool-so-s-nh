@@ -26,13 +26,13 @@ while true; do
           case "$file_type" in
             application/vnd.openxmlformats-officedocument.wordprocessingml.document)
               # Tệp DOCX
-              ./trichtxt.sh "$temp_dir/$file"
-              python3 trichhinh.py "$temp_dir/$file"
+              ./trich/trichtxtd.sh "$temp_dir/$file"
+              python3 ./trich/trichhinhdoc.py "$temp_dir/$file"
               ;;
             application/pdf)
               # Tệp PDF
-              pdftotext "$temp_dir/$file" "${temp_dir}/${file}_text.txt"
-              pdfimages "$temp_dir/$file" "${temp_dir}/${file}_image"
+              ./trich/trichtxtp.sh "$temp_dir/$file"
+              ./trich/trichhinhpdf.sh "$temp_dir/$file"
               ;;
           esac
         done
@@ -45,4 +45,6 @@ while true; do
       ;;
   esac
 done
+
+
 
